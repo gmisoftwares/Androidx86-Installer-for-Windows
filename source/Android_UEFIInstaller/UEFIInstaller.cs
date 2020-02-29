@@ -33,7 +33,6 @@ namespace Android_UEFIInstaller
              * Files:
              *           :\Android\kernel    
              *           :\Android\initrd
-             *           :\Android\ramdisk.img
              *           :\Android\system.img
              *           :\Android\data.img
              *           

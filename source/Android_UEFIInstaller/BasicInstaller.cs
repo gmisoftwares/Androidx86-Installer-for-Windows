@@ -70,7 +70,6 @@ namespace Android_UEFIInstaller
 
             String[] FileList = {InstallDirectory + @"\kernel",
                                 InstallDirectory + @"\initrd.img",
-                                InstallDirectory + @"\ramdisk.img",
                                 InstallDirectory + @"\system.sfs",
                                 };
             if (!VerifyFiles(FileList))
@@ -167,9 +166,9 @@ namespace Android_UEFIInstaller
         #region "ISO Extraction"
         private Boolean ExtractISO(String ISOFilePath, String ExtractDirectory)
         {
-            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "ramdisk.img" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
+            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"ramdisk.img\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
+            string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
             //
             //Extracting ISO Contents
             //
@@ -183,7 +182,7 @@ namespace Android_UEFIInstaller
 
         private Boolean ExtractSFS(String SFSPath)
         {
-            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "ramdisk.img" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
+            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
             string ExecutableArgs = String.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
             
