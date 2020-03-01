@@ -1,0 +1,6 @@
+;!@Install@!UTF-8!
+Title="Bliss OS - Windows installer"
+BeginPrompt="Do you want to install Bliss OS?"
+ExecuteFile="Android_UEFIInstaller.exe"
+ExecuteParameters=""
+;!@InstallEnd@!
