@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -32,7 +32,8 @@ namespace Android_UEFIInstaller
              *          Z:\EFI\Android
              * Files:
              *           :\Android\kernel    
-             *           :\Android\initrd
+             *           :\Android\initrd    
+             *           :\Android\gearlock
              *           :\Android\system.img
              *           :\Android\data.img
              *           

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -70,6 +70,7 @@ namespace Android_UEFIInstaller
 
             String[] FileList = {InstallDirectory + @"\kernel",
                                 InstallDirectory + @"\initrd.img",
+                                InstallDirectory + @"\gearlock",
                                 InstallDirectory + @"\system.sfs",
                                 };
             if (!VerifyFiles(FileList))
@@ -166,9 +167,9 @@ namespace Android_UEFIInstaller
         #region "ISO Extraction"
         private Boolean ExtractISO(String ISOFilePath, String ExtractDirectory)
         {
-            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
+            //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "gearlock" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
+            string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
             //
             //Extracting ISO Contents
             //
