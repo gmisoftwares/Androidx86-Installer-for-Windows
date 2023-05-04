@@ -35,6 +35,8 @@ namespace Android_UEFIInstaller
         IntPtr Handle;
         BackgroundWorker InstallationTask;
 
+        string rootOn = "false";
+
         public AndroidMaterial()
         {
             InitializeComponent();
@@ -375,6 +377,7 @@ namespace Android_UEFIInstaller
             cboDrives.IsEnabled = false;
             sldrSize.IsEnabled = false;
             ImgCmdBrowse.IsEnabled = false;
+            tgRoot.IsEnabled = false;
         }
 
         void EnableUI()
@@ -384,6 +387,7 @@ namespace Android_UEFIInstaller
             cboDrives.IsEnabled = true;
             sldrSize.IsEnabled = true;
             ImgCmdBrowse.IsEnabled = true;
+            tgRoot.IsEnabled = true;
         }
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
@@ -437,7 +441,7 @@ namespace Android_UEFIInstaller
             UEFIInstaller u = new UEFIInstaller();
 
             //if (!u.Install(Environment.CurrentDirectory + @"\android-x86-4.4-r2.img", "E", "1000"))
-            if (!u.Install(Path, Drive, Size))
+            if (!u.Install(Path, Drive, Size,rootOn))
                 MessageBox.Show("Install Failed" + Environment.NewLine + "Please check log at C:\\AndroidInstall_XXX.log");
             else
                 MessageBox.Show("Install Done");
@@ -447,7 +451,7 @@ namespace Android_UEFIInstaller
 
         void InstallationTask_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            throw new NotImplementedException();
+           //throw new NotImplementedException();
         }
 
         void InstallationTask_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -455,6 +459,19 @@ namespace Android_UEFIInstaller
             pbarStatus.IsIndeterminate = false;
             EnableUI();
         }
-       
+
+        private void toggleButton_onCheckChanged(object sender, RoutedEventArgs e)
+        {
+            if (tgRoot.IsChecked == true)
+            {
+                rootOn = "true";
+            }
+            else
+            {
+                rootOn = "false";
+            }
+
+            Log.write("root = " + rootOn);
+        }
     }
 }

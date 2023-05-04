@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Android_UEFIInstaller
 {
@@ -26,14 +23,13 @@ namespace Android_UEFIInstaller
     }
     abstract class BasicInstaller
     {
-
         PrivilegeClass.Privilege FirmwarePrivilege;
         public BasicInstaller()
         {
             FirmwarePrivilege = new PrivilegeClass.Privilege("SeSystemEnvironmentPrivilege");
         }
 
-        public virtual Boolean Install(String ISOFilePath, String InstallDrive, String UserDataSize)
+        public virtual Boolean Install(String ISOFilePath, String InstallDrive, String UserDataSize,String isRoot)
         {
             String InstallDirectory = String.Format(config.INSTALL_DIR, InstallDrive);
             Log.write(String.Format("====Install Started on {0}====", DateTime.Now));
@@ -51,6 +47,7 @@ namespace Android_UEFIInstaller
             if (!SetupDirectories(InstallDirectory))
                 return false;
 
+            
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
 
@@ -58,21 +55,28 @@ namespace Android_UEFIInstaller
              * System.sfs found extract it
              * System.sfs included in Androidx86 dist and not found with RemixOS
              */
-            /*if (File.Exists(InstallDirectory + @"\system.sfs" ))
-             *{
-             *    if (!ExtractSFS(InstallDirectory))
-             *        goto cleanup;
-             *}
-            */
-
+            if (isRoot == "true")
+            { 
+                if (File.Exists(InstallDirectory + @"\system.sfs" ))
+                {
+                    if (!ExtractSFS(InstallDirectory))
+                        goto cleanup;
+                }
+            }
+            
+         
             if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
                 goto cleanup;
 
             String[] FileList = {InstallDirectory + @"\kernel",
                                 InstallDirectory + @"\initrd.img",
-                                InstallDirectory + @"\gearlock",
-                                InstallDirectory + @"\system.sfs",
-                                };
+                                InstallDirectory + @"\system.sfs"
+                                }; //InstallDirectory + @"\gearlock",      Optional    
+          
+            if (isRoot == "true")
+                FileList[Array.IndexOf(FileList, InstallDirectory + @"\system.sfs")] = InstallDirectory + @"\system.img";
+                   
+
             if (!VerifyFiles(FileList))
                 goto cleanup;
 
@@ -170,31 +174,39 @@ namespace Android_UEFIInstaller
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "gearlock" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
             string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
+
             //
             //Extracting ISO Contents
             //
             Log.updateStatus("Status: Extracting ISO... Please wait");
             Log.write("-Extracting ISO");
-            if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
-                return false;
 
+            if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
+                    return false;
+         
             return true;
         }
 
         private Boolean ExtractSFS(String SFSPath)
         {
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
-            string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
+            //string ExecutablePath = Environment.CurrentDirectory + @"\rdsquashfs.exe"; //Alternative to 7z
+            //string ExecutableArgs = String.Format(" {0}\\system.sfs -u/ -p {0}", SFSPath);
+
+            string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
             string ExecutableArgs = String.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
-            
-            //
+
             //Extracting System.sfs
-            //
             Log.updateStatus("Status: Extracting SFS... Please wait");
             Log.write("-Extracting SFS");
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
 
+            Log.write("-Removing system.sfs");
+            string sysFile = String.Format(" {0}\\system.sfs", SFSPath);
+
+            File.Delete(sysFile);
+            
             return true;
         }
         #endregion
@@ -243,7 +255,6 @@ namespace Android_UEFIInstaller
 
             return true;
         }
-
 
         private Boolean WriteAndroidIDFile(String filePath)
         {
@@ -367,6 +378,7 @@ namespace Android_UEFIInstaller
                     return false;
                 }
 
+                         
                 return true;
             }
             catch (Exception ex)
@@ -375,5 +387,6 @@ namespace Android_UEFIInstaller
                 return false;
             }
         }
+
     }
 }

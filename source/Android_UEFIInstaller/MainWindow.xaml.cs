@@ -271,7 +271,7 @@ namespace Android_UEFIInstaller
             DisableUI();
 
             //if (!u.Install(Environment.CurrentDirectory + @"\android-x86-4.4-r2.img", "E", "1000"))
-            if (!u.Install(txtISOPath.Text,cboDrives.Text.Substring(0,1), cboSize.Text))
+            if (!u.Install(txtISOPath.Text,cboDrives.Text.Substring(0,1), cboSize.Text,"false"))
                 MessageBox.Show("Install Failed!");
             else
                 MessageBox.Show("Install Bliss-x86!");
