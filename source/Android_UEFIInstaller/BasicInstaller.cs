@@ -190,11 +190,11 @@ namespace Android_UEFIInstaller
         private Boolean ExtractSFS(String SFSPath)
         {
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
-            //string ExecutablePath = Environment.CurrentDirectory + @"\rdsquashfs.exe"; //Alternative to 7z
-            //string ExecutableArgs = String.Format(" {0}\\system.sfs -u/ -p {0}", SFSPath);
+            string ExecutablePath = Environment.CurrentDirectory + @"\rdsquashfs.exe"; //Alternative to 7z rdsquashfs
+            string ExecutableArgs = String.Format(" {0}\\system.sfs -u/ -p {0}", SFSPath);
 
-            string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
-            string ExecutableArgs = String.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
+            //string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
+            //string ExecutableArgs = String.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
 
             //Extracting System.sfs
             Log.updateStatus("Status: Extracting SFS... Please wait");
