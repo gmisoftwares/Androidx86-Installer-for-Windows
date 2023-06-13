@@ -1,1 +1,1 @@
-copy /b 7zS.sfx + config.txt + Androidx86-Installv28.5800.7z Androidx86-Installv28.5800.exe
+copy /b 7zS.sfx + config.txt + Androidx86-Installv29.0000.7z Androidx86-Installv29.0000.exe
