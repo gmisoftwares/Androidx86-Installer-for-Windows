@@ -1,10 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Android_UEFIInstaller
 {
@@ -45,7 +40,7 @@ namespace Android_UEFIInstaller
 
         protected override bool InstallBootObjects(Object extraData)
         {
-            String EFI_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_DIR;
+            string EFI_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_DIR;
             Log.write("===Installing Boot Objects===");
 
             if (!MountFirmwarePartition())
@@ -95,7 +90,7 @@ namespace Android_UEFIInstaller
             Log.write("-Mounting EFI Partition...");
             
             string MOUNT_EXE = @"C:\Windows\System32\mountvol.exe";
-            string MOUNT_CMD = String.Format(" Z: /S");
+            string MOUNT_CMD = string.Format(" Z: /S");
 
             
             if (!ExecuteCLICommand(MOUNT_EXE, MOUNT_CMD))
@@ -111,7 +106,7 @@ namespace Android_UEFIInstaller
             Log.updateStatus("UnMounting EFI Partition...");
             Log.write("-UnMounting EFI Partition...");
             string UNMOUNT_EXE = @"C:\Windows\System32\mountvol.exe";
-            string UNMOUNT_CMD = String.Format(" Z: /D");
+            string UNMOUNT_CMD = string.Format(" Z: /D");
 
             if (!ExecuteCLICommand(UNMOUNT_EXE,UNMOUNT_CMD))
             {
@@ -121,8 +116,7 @@ namespace Android_UEFIInstaller
             return true;
         }
 
-
-        private Boolean CreateBootDirectory(string directory)
+        private bool CreateBootDirectory(string directory)
         {
             
             Log.write("-Setup Boot Directory...");
@@ -140,7 +134,7 @@ namespace Android_UEFIInstaller
             return true;
         }
 
-        private Boolean CopyBootFiles(String directory)
+        private bool CopyBootFiles(string directory)
         {
             Log.write("-Copy Boot files");
             try
@@ -165,9 +159,9 @@ namespace Android_UEFIInstaller
             
         }
 
-        private Boolean CreateUEFIBootOption(String Drive)
+        private bool CreateUEFIBootOption(string Drive)
         {
-            String _Drive = String.Format(@"\\.\{0}",Drive);
+            string _Drive = string.Format(@"\\.\{0}",Drive);
 
             Log.write("-Add UEFI Entry");
             

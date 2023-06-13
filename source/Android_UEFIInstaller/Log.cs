@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace Android_UEFIInstaller
 {
@@ -13,9 +8,9 @@ namespace Android_UEFIInstaller
     {
         private static System.Windows.Controls.TextBox _buffer;
         private static System.Windows.Controls.TextBlock _lstatus;
-        private static String _lbuffer;
+        private static string _lbuffer;
 
-        public static void write(String text)
+        public static void write(string text)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -24,7 +19,7 @@ namespace Android_UEFIInstaller
             _lbuffer += (text + Environment.NewLine);
         }
 
-        public static void updateStatus(String text)
+        public static void updateStatus(string text)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -35,7 +30,7 @@ namespace Android_UEFIInstaller
         public static void save()
         {
 
-            String filePath = String.Format(config.LOG_FILE_PATH, DateTime.Now.Millisecond);
+            string filePath = string.Format(config.LOG_FILE_PATH, DateTime.Now.Millisecond);
             File.WriteAllText(filePath, _lbuffer);
         }
 

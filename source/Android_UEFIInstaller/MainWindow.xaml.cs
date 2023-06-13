@@ -1,23 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Management;
 
 namespace Android_UEFIInstaller
@@ -101,7 +86,7 @@ namespace Android_UEFIInstaller
         {
             Exception e = (Exception)args.ExceptionObject;
             Log.write("MyHandler caught : " + e.Message);
-            Log.write(String.Format("Runtime terminating: {0}", args.IsTerminating));
+            Log.write(string.Format("Runtime terminating: {0}", args.IsTerminating));
             Log.save();
         }
 
@@ -177,7 +162,7 @@ namespace Android_UEFIInstaller
                 Log.write("GPU: " + mo["Description"].ToString());
             }
         }
-        Boolean RequirementsCheck()
+        bool RequirementsCheck()
         {
             /*
              * App is running as admin
@@ -308,7 +293,7 @@ namespace Android_UEFIInstaller
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            foreach (String item in Environment.GetLogicalDrives())
+            foreach (string item in Environment.GetLogicalDrives())
             {
                 cboDrives.Items.Add(item);    
             }

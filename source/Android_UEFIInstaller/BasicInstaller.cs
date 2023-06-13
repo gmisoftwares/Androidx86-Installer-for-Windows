@@ -29,15 +29,15 @@ namespace Android_UEFIInstaller
             FirmwarePrivilege = new PrivilegeClass.Privilege("SeSystemEnvironmentPrivilege");
         }
 
-        public virtual Boolean Install(String ISOFilePath, String InstallDrive, String UserDataSize,String isRoot)
+        public virtual bool Install(string ISOFilePath, string InstallDrive, string UserDataSize,string isRoot)
         {
-            String InstallDirectory = String.Format(config.INSTALL_DIR, InstallDrive);
-            Log.write(String.Format("====Install Started on {0}====", DateTime.Now));
+            string InstallDirectory = string.Format(config.INSTALL_DIR, InstallDrive);
+            Log.write(string.Format("====Install Started on {0}====", DateTime.Now));
             Log.write("-ISO File: " + ISOFilePath);
             Log.write("-TargetDrive: " + InstallDrive);
             Log.write("-UserData: " + UserDataSize);
 
-            String OtherInstall = SearchForPreviousInstallation(config.INSTALL_FOLDER);
+            string OtherInstall = SearchForPreviousInstallation(config.INSTALL_FOLDER);
             if ( OtherInstall != "0")
             {
                 Log.write("Another Installation found on: " + OtherInstall + @":\");
@@ -68,7 +68,7 @@ namespace Android_UEFIInstaller
             if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
                 goto cleanup;
 
-            String[] FileList = {InstallDirectory + @"\kernel",
+            string[] FileList = {InstallDirectory + @"\kernel",
                                 InstallDirectory + @"\initrd.img",
                                 InstallDirectory + @"\system.sfs"
                                 }; //InstallDirectory + @"\gearlock",      Optional    
@@ -106,16 +106,16 @@ namespace Android_UEFIInstaller
             return false;
         }
 
-        public void Uninstall(String InstallDrive="0")
+        public void Uninstall(string InstallDrive="0")
         {
-            String InstallDirectory = String.Format(config.INSTALL_DIR, InstallDrive);
+            string InstallDirectory = string.Format(config.INSTALL_DIR, InstallDrive);
 
-            Log.write(String.Format("====Uninstall Started on {0}====", DateTime.Now));
+            Log.write(string.Format("====Uninstall Started on {0}====", DateTime.Now));
 
             InstallDrive = SearchForPreviousInstallation(config.INSTALL_FOLDER);
             if (InstallDrive != "0")
             {
-                cleanup(String.Format(config.INSTALL_DIR,InstallDrive));
+                cleanup(string.Format(config.INSTALL_DIR,InstallDrive));
             }
             else
             {
@@ -128,11 +128,11 @@ namespace Android_UEFIInstaller
             Log.write("==========================================");
         }
 
-        String SearchForPreviousInstallation(String FolderName)
+        string SearchForPreviousInstallation(string FolderName)
         {
-            String[] drives = Environment.GetLogicalDrives();
+            string[] drives = Environment.GetLogicalDrives();
 
-            foreach (String drive in drives)
+            foreach (string drive in drives)
             {
                 if (Directory.Exists(drive + FolderName))
                 {
@@ -143,7 +143,7 @@ namespace Android_UEFIInstaller
             return "0";
         }
 
-        private Boolean SetupDirectories(String directory)
+        private bool SetupDirectories(string directory)
         {
             Log.write("-Setup Directories...");
             try
@@ -169,11 +169,11 @@ namespace Android_UEFIInstaller
         }
 
         #region "ISO Extraction"
-        private Boolean ExtractISO(String ISOFilePath, String ExtractDirectory)
+        private bool ExtractISO(string ISOFilePath, string ExtractDirectory)
         {
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "gearlock" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = String.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
+            string ExecutableArgs = string.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
 
             //
             //Extracting ISO Contents
@@ -187,14 +187,14 @@ namespace Android_UEFIInstaller
             return true;
         }
 
-        private Boolean ExtractSFS(String SFSPath)
+        private bool ExtractSFS(string SFSPath)
         {
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
-            string ExecutablePath = Environment.CurrentDirectory + @"\rdsquashfs.exe"; //Alternative to 7z rdsquashfs
-            string ExecutableArgs = String.Format(" {0}\\system.sfs -u/ -p {0}", SFSPath);
+            //string ExecutablePath = Environment.CurrentDirectory + @"\rdsquashfs.exe"; //Alternative to 7z rdsquashfs
+            //string ExecutableArgs = string.Format(" {0}\\system.sfs -u/ -p {0}", SFSPath);
 
-            //string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
-            //string ExecutableArgs = String.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
+            string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
+            string ExecutableArgs = string.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
 
             //Extracting System.sfs
             Log.updateStatus("Status: Extracting SFS... Please wait");
@@ -203,7 +203,7 @@ namespace Android_UEFIInstaller
                 return false;
 
             Log.write("-Removing system.sfs");
-            string sysFile = String.Format(" {0}\\system.sfs", SFSPath);
+            string sysFile = string.Format(" {0}\\system.sfs", SFSPath);
 
             File.Delete(sysFile);
             
@@ -212,14 +212,14 @@ namespace Android_UEFIInstaller
         #endregion
         
         #region "Data Partition"
-        private Boolean CreateDataParition(String directory,String Size)
+        private bool CreateDataParition(string directory, string Size)
         {
             
             Log.updateStatus("Status: Creating Data.img... Please wait");
             Log.write("-Creating Data.img");
 
             string ExecutablePath = Environment.CurrentDirectory + @"\dd.exe";
-            string ExecutableArgs = String.Format(@"if=/dev/zero of={0}\data.img count={1}", directory, Size.ToString());
+            string ExecutableArgs = string.Format(@"if=/dev/zero of={0}\data.img count={1}", directory, Size.ToString());
 
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
@@ -228,12 +228,12 @@ namespace Android_UEFIInstaller
 
         }
 
-        private Boolean FormatDataPartition(String FilePath)
+        private bool FormatDataPartition(string FilePath)
         {
             Log.updateStatus("Status: initialize Data.img... Please wait");
             Log.write("-Initialize Data.img");
             string ExecutablePath = Environment.CurrentDirectory + @"\mke2fs.exe";
-            string ExecutableArgs = String.Format("-F -t ext4 \"{0}\\data.img\"", FilePath);
+            string ExecutableArgs = string.Format("-F -t ext4 \"{0}\\data.img\"", FilePath);
 
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
@@ -242,9 +242,9 @@ namespace Android_UEFIInstaller
         }
         #endregion
 
-        private Boolean VerifyFiles(String[] FileList)
+        private bool VerifyFiles(string[] FileList)
         {
-            foreach (String file in FileList)
+            foreach (string file in FileList)
             {
                 if (!File.Exists(file))
                 {
@@ -256,20 +256,20 @@ namespace Android_UEFIInstaller
             return true;
         }
 
-        private Boolean WriteAndroidIDFile(String filePath)
+        private bool WriteAndroidIDFile(string filePath)
         {
             File.WriteAllText(filePath + @"\android.boot", "GRUB2_ANDROID_ID");
             return File.Exists(filePath + @"\android.boot");
         }
 
-        private Boolean DetectAndroidVariant(String ISOFilePath, String ExtractDirectory)
+        private bool DetectAndroidVariant(string ISOFilePath, string ExtractDirectory)
         {
             //Extract grub.cfg
             //Check for androidboot.hardware value
             //Set config.remixos
 
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = String.Format(" e \"{0}\" \"boot\\grub\\grub.cfg\" -o{1}", ISOFilePath, ExtractDirectory);
+            string ExecutableArgs = string.Format(" e \"{0}\" \"boot\\grub\\grub.cfg\" -o{1}", ISOFilePath, ExtractDirectory);
 
             Log.updateStatus("Status: Check Android variant type...");
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
@@ -278,7 +278,7 @@ namespace Android_UEFIInstaller
             if (!File.Exists(ExtractDirectory + @"\grub.cfg"))
                 return false;
 
-            String grubcfg = File.ReadAllText(ExtractDirectory + @"\grub.cfg");
+            string grubcfg = File.ReadAllText(ExtractDirectory + @"\grub.cfg");
 
             int idx = grubcfg.IndexOf("remix");
             if (idx <= 0){
@@ -295,11 +295,11 @@ namespace Android_UEFIInstaller
 
         }
 
-        protected abstract Boolean InstallBootObjects(Object extraData);
-        protected abstract Boolean UnInstallBootObjects(Object extraData);
+        protected abstract bool InstallBootObjects(Object extraData);
+        protected abstract bool UnInstallBootObjects(Object extraData);
 
     
-        protected virtual bool cleanup(String directory)
+        protected virtual bool cleanup(string directory)
         {
             Log.write("-Cleaning up Bliss Directory ... " + directory);
             try
@@ -333,14 +333,14 @@ namespace Android_UEFIInstaller
                 case InstallationStep.CREATE_DATA:
                 case InstallationStep.EXTRACT_SFS:
                 case InstallationStep.EXTRACT_ISO:
-                    String iso = info as String;
+                    string iso = info as string;
                     //Log.write("Error: ISO Extraction failed > " + iso);
                     //Directory.Delete(InstallDirectory, true);
                    // Directory.EnumerateFileSystemEntries(InstallDirectory).Any();
                     break;
 
                 case InstallationStep.CREATE_DIRECTORIES:
-                    String dir = info as String;
+                    string dir = info as string;
                     Log.write("Error: Folder Exist > " + dir);
                     //System.Windows.MessageBox.Show(dir + " Already Exist\n" + "Aborting Installation Process", "Error", System.Windows.forms.MessageBoxButtons.OK);
                     break;
@@ -350,7 +350,7 @@ namespace Android_UEFIInstaller
             }
         }
         */
-        protected Boolean ExecuteCLICommand(String FilePath, String args)
+        protected bool ExecuteCLICommand(string FilePath, string args)
         {
             string CliExecutable = FilePath;
             string CliArguments = args;
@@ -371,7 +371,7 @@ namespace Android_UEFIInstaller
 
                 if (p.ExitCode != 0)
                 {
-                    Log.write(String.Format("Error Executing {0} with Args: {1}", FilePath, args));
+                    Log.write(string.Format("Error Executing {0} with Args: {1}", FilePath, args));
                     Log.write("Error output:");
                     Log.write(p.StandardError.ReadToEnd());
                     Log.write(p.StandardOutput.ReadToEnd());

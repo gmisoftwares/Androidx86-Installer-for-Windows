@@ -1,10 +1,9 @@
 using System;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace PrivilegeClass
 {
-	[Serializable]
+    [Serializable]
 	public sealed class PrivilegeNotHeldException : UnauthorizedAccessException, ISerializable
 	{
 		private readonly string privilegeName = null;

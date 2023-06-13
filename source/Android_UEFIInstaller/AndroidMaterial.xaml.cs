@@ -97,7 +97,7 @@ namespace Android_UEFIInstaller
         {
             Exception e = (Exception)args.ExceptionObject;
             Log.write("MyHandler caught : " + e.Message);
-            Log.write(String.Format("Runtime terminating: {0}", args.IsTerminating));
+            Log.write(string.Format("Runtime terminating: {0}", args.IsTerminating));
             Log.save();
         }
 
@@ -181,9 +181,9 @@ namespace Android_UEFIInstaller
             osDetailsCollection = objOSDetails.Get();
             foreach (ManagementObject mo in osDetailsCollection)
             {
-                String[] iBIOS = (String[])mo["BIOSVersion"];
+                string[] iBIOS = (string[])mo["BIOSVersion"];
                 Log.write("BIOS info:");
-                foreach (String item in iBIOS)
+                foreach (string item in iBIOS)
                 {
                     Log.write(item);
                 }
@@ -200,7 +200,7 @@ namespace Android_UEFIInstaller
                 Log.write("GPU: " + mo["Description"].ToString());
             }
         }
-        Boolean RequirementsCheck()
+        bool RequirementsCheck()
         {
             /*
              * App is running as admin
@@ -296,9 +296,9 @@ namespace Android_UEFIInstaller
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            String Path=txtISOPath.Text;
-            String Drive=cboDrives.Text.Substring(0, 1);
-            String Size = Convert.ToUInt64((sldrSize.Value * 1024 * 1024 * 1024)/512).ToString();
+            string Path=txtISOPath.Text;
+            string Drive=cboDrives.Text.Substring(0, 1);
+            string Size = Convert.ToUInt64((sldrSize.Value * 1024 * 1024 * 1024)/512).ToString();
 
             if (!File.Exists(Path))
             {
@@ -320,7 +320,7 @@ namespace Android_UEFIInstaller
             DisableUI();
             pbarStatus.IsIndeterminate = true;
 
-            String[] InstallInfo = { Path, Drive, Size };
+            string[] InstallInfo = { Path, Drive, Size };
             InstallationTask.RunWorkerAsync(InstallInfo);
         }
 
@@ -353,7 +353,7 @@ namespace Android_UEFIInstaller
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            foreach (String item in Environment.GetLogicalDrives())
+            foreach (string item in Environment.GetLogicalDrives())
             {
                 cboDrives.Items.Add(item);
             }
@@ -424,10 +424,10 @@ namespace Android_UEFIInstaller
 
         void InstallationTask_DoWork(object sender, DoWorkEventArgs e)
         {
-            String[] InstallInfo = (String[])e.Argument;
-            String Path = InstallInfo[0];
-            String Drive = InstallInfo[1];
-            String Size = InstallInfo[2];
+            string[] InstallInfo = (string[])e.Argument;
+            string Path = InstallInfo[0];
+            string Drive = InstallInfo[1];
+            string Size = InstallInfo[2];
 
             UEFIInstaller u = new UEFIInstaller();
 

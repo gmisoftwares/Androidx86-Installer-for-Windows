@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Android_UEFIInstaller
 {
@@ -19,13 +15,13 @@ namespace Android_UEFIInstaller
         [DllImport(@"Win32UEFI.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool UEFI_isUEFIAvailable();
         [DllImport(@"Win32UEFI.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool UEFI_MakeMediaBootOption([MarshalAsAttribute(UnmanagedType.LPWStr)]String Description, 
-                                                           [MarshalAsAttribute(UnmanagedType.LPWStr)] String DiskLetter, 
-                                                           [MarshalAsAttribute(UnmanagedType.LPWStr)] String Path);
+        public static extern bool UEFI_MakeMediaBootOption([MarshalAs(UnmanagedType.LPWStr)] string Description, 
+                                                           [MarshalAs(UnmanagedType.LPWStr)] string DiskLetter, 
+                                                           [MarshalAs(UnmanagedType.LPWStr)] string Path);
 
         [DllImport(@"Win32UEFI.dll", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I4)]
-        public static extern int UEFI_DeleteBootOptionByDescription([MarshalAsAttribute(UnmanagedType.LPWStr)]String Description);
+        public static extern int UEFI_DeleteBootOptionByDescription([MarshalAs(UnmanagedType.LPWStr)]string Description);
         /*
         [DllImport(@"Win32UEFI.dll")]
         void UEFI_MakeMediaBootOption(WCHAR* Description, WCHAR* DiskLetter, WCHAR* Path);

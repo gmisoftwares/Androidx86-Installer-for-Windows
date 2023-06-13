@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Android_UEFIInstaller
 {
-	class WindowsSecurity
+    class WindowsSecurity
 	{
 		private const long ERROR_NOT_ALL_ASSIGNED = 1300;
 		private const string NTSecurityPrivilege = "SeSystemEnvironmentPrivilege";
@@ -16,7 +12,7 @@ namespace Android_UEFIInstaller
 		private static Win32Native.TOKEN_PRIVILEGES tp2;
 		private static IntPtr hToken;
 
-		public Boolean GetAccesstoNVRam()
+		public bool GetAccesstoNVRam()
 		{
 			
 
@@ -33,7 +29,7 @@ namespace Android_UEFIInstaller
 			return true;
 		}
 
-		Boolean EnablePrivilege(IntPtr HANDLE,string lpszPrivilege)
+		bool EnablePrivilege(IntPtr HANDLE,string lpszPrivilege)
 		{
 			if (!Win32Native.LookupPrivilegeValue(null,lpszPrivilege,out luid))
 			{
