@@ -20,3 +20,4 @@
 ipch/
 [Bb]uild/
 obj/
+source/Win32-UEFILibrary
