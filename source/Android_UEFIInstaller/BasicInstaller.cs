@@ -63,17 +63,17 @@ namespace Android_UEFIInstaller
 
 
             if (isRoot == "true")
-            { 
+            {
+                string achvFile = "";
+
                 if (File.Exists(InstallDirectory + @"\system.sfs" ))
-                {
-                    if (!ExtractSFS("system.sfs",InstallDirectory))
+                    achvFile = "system.sfs";
+                else
+                if (File.Exists(InstallDirectory + @"\system.efs"))
+                    achvFile = "system.efs";
+               
+                if (!ExtractSFS(achvFile, InstallDirectory))
                         goto cleanup;
-                }
-                else if(File.Exists(InstallDirectory + @"\system.efs"))
-                {
-                    if (!ExtractSFS("system.efs",InstallDirectory))
-                        goto cleanup;
-                }
 
                 FileList[2] = InstallDirectory + @"\system.img";        //replace system.* with system.img in the file verification check
             }
@@ -197,21 +197,19 @@ namespace Android_UEFIInstaller
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
      
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
-            string ExecutableArgs = string.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
-            if (fileToExtract == "system.efs")
-            {
-                ExecutableArgs = string.Format(" x {0}\\system.efs \"system.img\" -o{0}", SFSPath);
-            }
-            
+            //string ExecutableArgs = string.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
+            string ExecutableArgs = string.Format(" x {0}\\{1} \"system.img\" -o{0}", SFSPath,fileToExtract);
+
             //Extracting System.sfs
             Log.updateStatus("Status: Extracting IMG... Please wait");
             Log.write("-Extracting IMG");
+
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
 
-            Log.write("-Removing system.sfs");
-            string sysFile = string.Format(" {0}\\system.sfs", SFSPath);
-
+            Log.write("-Removing " + fileToExtract);
+            string sysFile = string.Format(" {0}\\{1}", SFSPath,fileToExtract);
+          
             File.Delete(sysFile);
             
             return true;
