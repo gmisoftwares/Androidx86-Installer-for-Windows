@@ -61,30 +61,27 @@ namespace Android_UEFIInstaller
                                 InstallDirectory + @"\system.sfs"
                                 }; //InstallDirectory + @"\gearlock",      Optional
 
+            string achvFile = "system.sfs";
+            if (File.Exists(InstallDirectory + @"\system.efs"))
+            {
+                achvFile = "system.efs";
+                FileList[2] = InstallDirectory + @"\system.efs";
+            };
 
             if (isRoot == "true")
-            {
-                string achvFile = "";
-
-                if (File.Exists(InstallDirectory + @"\system.sfs" ))
-                    achvFile = "system.sfs";
-                else
-                if (File.Exists(InstallDirectory + @"\system.efs"))
-                    achvFile = "system.efs";
-               
-                if (!ExtractSFS(achvFile, InstallDirectory))
-                        goto cleanup;
-
-                FileList[2] = InstallDirectory + @"\system.img";        //replace system.* with system.img in the file verification check
+            {                
+                if (ExtractSFS(achvFile, InstallDirectory))
+                   FileList[2] = InstallDirectory + @"\system.img"; 
+                else   
+                   goto cleanup;                
             }
-            
-         
-            if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
-                goto cleanup;                   
-
+                                        
             if (!VerifyFiles(FileList))
                 goto cleanup;
 
+            if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
+                goto cleanup;  
+  
             if (!CreateDataParition(InstallDirectory, UserDataSize))
                 goto cleanup;
 
@@ -197,13 +194,22 @@ namespace Android_UEFIInstaller
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
      
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe"; //version 16.02
-            //string ExecutableArgs = string.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
-            string ExecutableArgs = string.Format(" x {0}\\{1} \"system.img\" -o{0}", SFSPath,fileToExtract);
-
+            string ExecutableArgs = string.Format(" x {0}\\system.sfs \"system.img\" -o{0}", SFSPath);
+            
             //Extracting System.sfs
-            Log.updateStatus("Status: Extracting IMG... Please wait");
-            Log.write("-Extracting IMG");
+            Log.updateStatus("Status: Extracting SFS... Please wait");
+            Log.write("-Extracting SFS");
 
+            if (fileToExtract == "system.efs")
+            {
+                ExecutablePath = Environment.CurrentDirectory + @"\efs\extract.erofs.exe";
+                ExecutableArgs = string.Format(" -x -i {0}\\system.efs -o{0}", SFSPath);
+
+                //Extracting System.sfs
+                Log.updateStatus("Status: Extracting EFS... Please wait");
+                Log.write("-Extracting EFS");
+            }
+                         
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
 
@@ -211,7 +217,14 @@ namespace Android_UEFIInstaller
             string sysFile = string.Format(" {0}\\{1}", SFSPath,fileToExtract);
           
             File.Delete(sysFile);
-            
+
+            if (fileToExtract == "system.efs")
+            {
+                File.Move(SFSPath + @"\system\system.img", SFSPath + @"\system.img");
+                Directory.Delete(SFSPath + @"\system", true);
+                Directory.Delete(SFSPath + @"\config",true);
+            }
+
             return true;
         }
         #endregion
