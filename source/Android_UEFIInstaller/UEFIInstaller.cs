@@ -12,7 +12,7 @@ namespace Android_UEFIInstaller
             UEFI_ENTRY
         }
         
-            /* 
+         /* 
              * 
              * Create dirs
              * Install Android Files
@@ -36,11 +36,12 @@ namespace Android_UEFIInstaller
              *           :\EFI\Android\grubx64.efi
              *           :\EFI\Android\grub.cfg
              */
-
-
+             
         protected override bool InstallBootObjects(Object extraData)
         {
-            string EFI_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_DIR;
+            string EFI_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_BOOT;
+            string BOOT_DIR = config.UEFI_PARTITION_MOUNTPOINT;// + config.BOOT_GRUB;
+
             Log.write("===Installing Boot Objects===");
 
             if (!MountFirmwarePartition())
@@ -49,9 +50,11 @@ namespace Android_UEFIInstaller
             if (!CreateBootDirectory(EFI_DIR))
                 return false;
 
-            if (!CopyBootFiles(EFI_DIR))
+            if (!CopyBootFiles((String)extraData,EFI_DIR))
                 return false;
 
+            if (!CopyBootGrubFiles((String)extraData, BOOT_DIR))
+                return false;
 
             if (!CreateUEFIBootOption(config.UEFI_PARTITION_MOUNTPOINT))
                 return false;
@@ -78,7 +81,9 @@ namespace Android_UEFIInstaller
             {
                 Log.write("-UEFI Init ... fail");
             }
-            base.cleanup(config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_DIR);
+            base.cleanup(config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_BOOT);
+            base.cleanup(config.UEFI_PARTITION_MOUNTPOINT + @"boot\");
+
             UnMountFirmwarePartition();
 
             return true;
@@ -118,7 +123,7 @@ namespace Android_UEFIInstaller
 
         private bool CreateBootDirectory(string directory)
         {
-            
+
             Log.write("-Setup Boot Directory...");
             if (!Directory.Exists(directory))
             {
@@ -134,20 +139,27 @@ namespace Android_UEFIInstaller
             return true;
         }
 
-        private bool CopyBootFiles(string directory)
+        private bool CopyBootFiles(string ISOFilePath, string EFI_DIR)
         {
             Log.write("-Copy Boot files");
             try
             {
+                //Backward Compatibility <15
                 if (Environment.Is64BitOperatingSystem)
-                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN64, directory + @"\" + config.UEFI_GRUB_BIN64, false);
+                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN64, EFI_DIR + @"\" + config.UEFI_GRUB_BIN64, false);
                 else
-                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN32, directory + @"\" + config.UEFI_GRUB_BIN32, false);
-                
-                if (!config.RemixOS_Found)
-                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_CONFIG, directory + @"\" + config.UEFI_GRUB_CONFIG, false);    //Android-x86
-                else
-                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_RX_CONFIG, directory + @"\" + config.UEFI_GRUB_CONFIG, false);    //RemixOS
+                    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN32, EFI_DIR + @"\" + config.UEFI_GRUB_BIN32, false);
+
+                File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_CONFIG, EFI_DIR + @"\" + config.UEFI_GRUB_CONFIG, false);    //Android-x86
+               //End
+                 
+                string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
+
+                string ExecutableArgs = string.Format(" e \"{0}\" \"boot\\grub\\grub.cfg\" \"efi\\boot\\*\" -o{1}", ISOFilePath, EFI_DIR);   
+
+                Log.updateStatus("Status: Copying boot files...");
+                if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
+                    return false;
 
                 return true;
             }
@@ -157,6 +169,29 @@ namespace Android_UEFIInstaller
                 return false;
             }
             
+        }
+
+        private bool CopyBootGrubFiles(string ISOFilePath, string BOOT_DIR)
+        {
+            Log.write("-Copy Boot files");
+            try
+            {
+                string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
+
+                string ExecutableArgs = string.Format(" x \"{0}\" \"boot\\grub\\theme\\*\" \"boot\\grub\\fonts\\*\" -o{1}", ISOFilePath, BOOT_DIR);
+
+                Log.updateStatus("Status: Copying boot files...");
+                if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
+                    return false;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.write(ex.Message);
+                return false;
+            }
+
         }
 
         private bool CreateUEFIBootOption(string Drive)
@@ -174,7 +209,7 @@ namespace Android_UEFIInstaller
             if (Environment.Is64BitOperatingSystem)
             {
 
-                if (!UEFIWrapper.UEFI_MakeMediaBootOption(config.BOOT_ENTRY_TEXT, _Drive, config.UEFI_DIR + config.UEFI_GRUB_BIN64))
+                if (!UEFIWrapper.UEFI_MakeMediaBootOption(config.BOOT_ENTRY_TEXT, _Drive, config.UEFI_BOOT + config.UEFI_GRUB_BIN64))
                 {
                     Log.write("UEFI 64-bit Entry Fail");
                     return false;
@@ -182,7 +217,7 @@ namespace Android_UEFIInstaller
             }
             else
             {
-                if (!UEFIWrapper.UEFI_MakeMediaBootOption(config.BOOT_ENTRY_TEXT, _Drive, config.UEFI_DIR + config.UEFI_GRUB_BIN32))
+                if (!UEFIWrapper.UEFI_MakeMediaBootOption(config.BOOT_ENTRY_TEXT, _Drive, config.UEFI_BOOT + config.UEFI_GRUB_BIN32))
                 {
                     Log.write("UEFI 32-bit Entry Fail");
                     return false;

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -27,11 +28,13 @@ namespace Android_UEFIInstaller
         BackgroundWorker InstallationTask;
 
         string rootOn = "false";
+        string task = "install";
 
         public AndroidMaterial()
         {
             InitializeComponent();
-            
+            cmdUpdate.IsEnabled = false;
+
             Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             this.Title += "v" + v.Major.ToString() + "." + v.Minor.ToString();
 #if ALPHA_TRIAL
@@ -296,9 +299,9 @@ namespace Android_UEFIInstaller
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string Path=txtISOPath.Text;
-            string Drive=cboDrives.Text.Substring(0, 1);
-            string Size = Convert.ToUInt64((sldrSize.Value * 1024 * 1024 * 1024)/512).ToString();
+            string Path = txtISOPath.Text;
+            string Drive = cboDrives.Text.Substring(0, 1);
+            string Size = Convert.ToUInt64((sldrSize.Value * 1024 * 1024 * 1024) / 512).ToString();
 
             if (!File.Exists(Path))
             {
@@ -324,7 +327,12 @@ namespace Android_UEFIInstaller
             InstallationTask.RunWorkerAsync(InstallInfo);
         }
 
-
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            task = "update";
+            
+            Button_Click(sender, e);
+        }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -338,18 +346,22 @@ namespace Android_UEFIInstaller
             EnableUI();
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = ".img";
-            dlg.Filter = "Android System Image |*.iso;*.img";
+        //private void Button_Click_2(object sender, RoutedEventArgs e)
+        //{
+        //    OpenFileDialog dlg = new OpenFileDialog();
+        //    dlg.DefaultExt = ".img";
+        //    dlg.Filter = "Android System Image |*.iso;*.img";
 
-            if (dlg.ShowDialog() == true)
-            {
-                txtISOPath.Text = dlg.FileName;
-                cmdInstall.IsEnabled = true;
-            }
-        }
+        //    if (dlg.ShowDialog() == true)
+        //    {
+        //        txtISOPath.Text = dlg.FileName;
+        //        cmdInstall.IsEnabled = true;
+
+        //        string Drive = cboDrives.Text.Substring(0, 1);
+        //        string InstallDirectory = string.Format(config.INSTALL_DIR, Drive);
+                             
+        //    }
+        //}
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -391,6 +403,11 @@ namespace Android_UEFIInstaller
             {
                 txtISOPath.Text = dlg.FileName;
                 cmdInstall.IsEnabled = true;
+
+                string Drive = cboDrives.Text.Substring(0, 1);
+                string InstallDirectory = string.Format(config.INSTALL_DIR, Drive);
+
+                cmdUpdate.IsEnabled = checkUpdate(txtISOPath.Text, InstallDirectory);
             }
         }
 
@@ -431,18 +448,28 @@ namespace Android_UEFIInstaller
 
             UEFIInstaller u = new UEFIInstaller();
 
-            //if (!u.Install(Environment.CurrentDirectory + @"\android-x86-4.4-r2.img", "E", "1000"))
-            if (!u.Install(Path, Drive, Size,rootOn))
-                MessageBox.Show("Install Failed" + Environment.NewLine + "Please check log at C:\\AndroidInstall_XXX.log");
+            if (task == "update")
+            {
+                if (!u.UpdateInstall(Path, Drive, Size, rootOn))
+                    MessageBox.Show("Update Failed" + Environment.NewLine + "Please check log at C:\\AndroidInstall_XXX.log");
+                else
+                    MessageBox.Show("Update Done");
+            }
             else
-                MessageBox.Show("Install Done");
+            {
+                if (!u.Install(Path, Drive, Size, rootOn))
+                    MessageBox.Show("Install Failed" + Environment.NewLine + "Please check log at C:\\AndroidInstall_XXX.log");
+                else
+                    MessageBox.Show("Install Done");
+            }
 
+            task = "install";
             MessageBox.Show("Kindly report back the installation status to the developer");
         }
 
         void InstallationTask_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-           //throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         void InstallationTask_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -464,5 +491,66 @@ namespace Android_UEFIInstaller
 
             Log.write("root = " + rootOn);
         }
+
+        private bool checkUpdate(string ISOFilePath, string ExtractDirector)
+        {
+            Log.updateStatus("Status: checking for update...");
+
+            try
+            {
+
+                string fileName = ISOFilePath.Split('\\').Last().Replace(".iso", "");
+
+                string[] parts = fileName.Split('-');
+
+                string ANDROIDVERS = parts[1];      //v15.8.6
+                string BUILDTYPE = parts[4];        //gapps or foss
+                string BUILDDATE = parts.Last();    //20230614
+
+                if (!File.Exists(ExtractDirector + "\\tag.txt"))
+                {
+                    return false;
+                }
+
+                string output = File.ReadAllText(ExtractDirector + "\\tag.txt");
+                string[] outs = output.Split(';');
+                string builddate = outs[0];
+                string androidvers = outs[1];
+                string buildtype =outs.Last(); 
+
+                if (buildtype == BUILDTYPE)
+                {
+                    ANDROIDVERS = ANDROIDVERS.Split('.').First().Replace("v", "");
+                    androidvers = androidvers.Split('.').First().Replace("v", "");
+                    int VERS = int.Parse(ANDROIDVERS);
+                    int vers = int.Parse(androidvers);
+
+                    int bdate = int.Parse(builddate);
+                    int DATE = int.Parse(BUILDDATE);
+
+                    Log.updateStatus("Status: Ready...");
+
+                    if (vers > VERS)
+                    {
+                        return true;
+                    }
+
+                    if ((vers == VERS) && (bdate > DATE))
+                    {
+                        return true;
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.write("Exception: " + ex.Message);
+            }
+
+            Log.updateStatus("Status: Ready...");
+            return false;
+        }
+
     }
 }
