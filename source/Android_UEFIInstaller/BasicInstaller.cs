@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Android_UEFIInstaller
 {
@@ -37,6 +37,7 @@ namespace Android_UEFIInstaller
             Log.write("-TargetDrive: " + InstallDrive);
             Log.write("-UserData: " + UserDataSize);
 
+         
             string OtherInstall = SearchForPreviousInstallation(config.INSTALL_FOLDER);
             if ( OtherInstall != "0")
             {
@@ -47,10 +48,11 @@ namespace Android_UEFIInstaller
             if (!SetupDirectories(InstallDirectory))
                 return false;
 
-            
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
 
+            setVersionTag(ISOFilePath, InstallDirectory);
+           
             /*
              * System.sfs found extract it
              * System.sfs included in Androidx86 dist and not found with RemixOS
@@ -75,12 +77,13 @@ namespace Android_UEFIInstaller
                 else   
                    goto cleanup;                
             }
-                                        
+
+                     
             if (!VerifyFiles(FileList))
                 goto cleanup;
 
-            if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
-                goto cleanup;  
+            //if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
+            //    goto cleanup;  
   
             if (!CreateDataParition(InstallDirectory, UserDataSize))
                 goto cleanup;
@@ -91,9 +94,10 @@ namespace Android_UEFIInstaller
             if (!WriteAndroidIDFile(InstallDirectory))
                 goto cleanup;
 
-            if (!InstallBootObjects(null))
+            if (!InstallBootObjects(ISOFilePath))
                 goto cleanup;
 
+          
             Log.write("==========================================");
             Log.updateStatus("Installation finished!");
             return true;
@@ -187,6 +191,23 @@ namespace Android_UEFIInstaller
                     return false;
          
             return true;
+        }
+
+        private void setVersionTag(string ISOFilePath, string ExtractDirector)
+        {
+            string fileName = ISOFilePath.Split('\\').Last().Replace(".iso","");
+          
+            string[] parts = fileName.Split('-');
+
+            string BUILD = parts.Last();    //20230614
+            string ANDROIDVERS = parts[1];      //v15.8.6
+            string BUILDTYPE = parts[4];        //gapps or foss
+
+            string output = string.Format("{0};{1};{2}",BUILD,ANDROIDVERS,BUILDTYPE);
+            
+            Log.updateStatus("Status: Copying boot files...");
+            File.WriteAllText(ExtractDirector + @"\tag.txt", output);
+            //return File.Exists(ExtractDirector + @"\tag.txt");
         }
 
         private bool ExtractSFS(string fileToExtract,string SFSPath)
@@ -287,8 +308,9 @@ namespace Android_UEFIInstaller
             //Set config.remixos
 
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = string.Format(" e \"{0}\" \"boot\\grub\\grub.cfg\" -o{1}", ISOFilePath, ExtractDirectory);
+            string ExecutableArgs = string.Format(" e \"{0}\" \"boot\\grub\\grub.cfg\"  -o{1}", ISOFilePath, ExtractDirectory);
 
+    
             Log.updateStatus("Status: Check Android variant type...");
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                 return false;
@@ -299,14 +321,14 @@ namespace Android_UEFIInstaller
             string grubcfg = File.ReadAllText(ExtractDirectory + @"\grub.cfg");
 
             int idx = grubcfg.IndexOf("remix");
-            if (idx <= 0){
-                config.RemixOS_Found = false;
-            }
-            else
-            {
-                Log.write("RemixOS Found");
-                config.RemixOS_Found = true;
-            }
+            //if (idx <= 0){
+            //    config.RemixOS_Found = false;
+            //}
+            //else
+            //{
+            //    Log.write("RemixOS Found");
+            //    config.RemixOS_Found = true;
+            //}
 
             File.Delete(ExtractDirectory + @"\grub.cfg");
             return true;
@@ -316,7 +338,6 @@ namespace Android_UEFIInstaller
         protected abstract bool InstallBootObjects(Object extraData);
         protected abstract bool UnInstallBootObjects(Object extraData);
 
-    
         protected virtual bool cleanup(string directory)
         {
             Log.write("-Cleaning up Bliss Directory ... " + directory);
@@ -395,7 +416,6 @@ namespace Android_UEFIInstaller
                     Log.write(p.StandardOutput.ReadToEnd());
                     return false;
                 }
-
                          
                 return true;
             }
@@ -404,6 +424,59 @@ namespace Android_UEFIInstaller
                 Log.write("Exception: " + ex.Message);
                 return false;
             }
+        }
+
+        public virtual bool UpdateInstall(string ISOFilePath, string InstallDrive, string UserDataSize, string isRoot)
+        {
+            string InstallDirectory = string.Format(config.INSTALL_DIR, InstallDrive);
+            Log.write(string.Format("====Install Started on {0}====", DateTime.Now));
+            Log.write("-ISO File: " + ISOFilePath);
+            Log.write("-TargetDrive: " + InstallDrive);
+            Log.write("-UserData: " + UserDataSize);
+
+            if (!ExtractISO(ISOFilePath, InstallDirectory))
+                goto cleanup;
+
+            string[] FileList = {InstallDirectory + @"\kernel",
+                                InstallDirectory + @"\initrd.img",
+                                InstallDirectory + @"\system.sfs"
+                                }; //InstallDirectory + @"\gearlock",      Optional
+
+            string achvFile = "system.sfs";
+            if (File.Exists(InstallDirectory + @"\system.efs"))
+            {
+                achvFile = "system.efs";
+                FileList[2] = InstallDirectory + @"\system.efs";
+            };
+
+            if (isRoot == "true")
+            {
+                if (ExtractSFS(achvFile, InstallDirectory))
+                    FileList[2] = InstallDirectory + @"\system.img";
+                else
+                    goto cleanup;
+            }
+
+            if (!VerifyFiles(FileList))
+                goto cleanup;
+
+            if (!InstallBootObjects(ISOFilePath))
+                goto cleanup;
+
+            setVersionTag(ISOFilePath, InstallDirectory);
+
+            Log.write("==========================================");
+            Log.updateStatus("Installation finished!");
+            return true;
+
+            cleanup:
+            Log.updateStatus("Installation failed!");
+            //Log.write("==============Revert Installation==============");
+            //cleanup(InstallDirectory);
+            //UnInstallBootObjects(null);
+            //Log.write("==========================================");
+            //Log.updateStatus("Nothing happend");
+            return false;
         }
 
     }

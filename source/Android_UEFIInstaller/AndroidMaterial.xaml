@@ -46,8 +46,9 @@
             </Grid.ColumnDefinitions>
             <TextBox Name="txtlog" HorizontalAlignment="Right" Height="80" Text="" VerticalAlignment="Top" Width="350" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" IsReadOnly="True" Style="{x:Null}" FontSize="11" FontStyle="Normal" TextChanged="txtlog_TextChanged" Visibility="Hidden" Grid.Column="3" Margin="0,0,-0.333,0" Grid.ColumnSpan="2"/>
             <!-- Install button -->
-            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,9.667,10" Width="180" Grid.Column="4" Height="74">
+            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,9.667,10" Width="180" Grid.Column="4">
                 <Button Name="cmdInstall" Content="Install" Width="120" Click="Button_Click" Margin="5" Background="#77c159"/>
+                <Button Name="cmdUpdate" Content="Update" Width="120" Click="Update_Click" Margin="5" Background="#FF6D8DBC"/>
                 <Button Name="cmdRemove" Content="Cleanup"  Width="120" Style="{StaticResource MaterialDesignRaisedAccentButton}" Click="Button_Click_1"/>
             </StackPanel>
             <!-- Gray separator -->
