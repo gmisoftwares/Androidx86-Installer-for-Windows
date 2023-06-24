@@ -509,6 +509,7 @@ namespace Android_UEFIInstaller
 
                 if (!File.Exists(ExtractDirector + "\\tag.txt"))
                 {
+                    Log.updateStatus("Status: Ready...");
                     return false;
                 }
 

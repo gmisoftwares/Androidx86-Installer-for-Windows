@@ -9,10 +9,10 @@
         /* OS-Dir Config */
         public const string INSTALL_FOLDER = "AndroidOS";
         public const string INSTALL_DIR = @"{0}:\" + INSTALL_FOLDER;
-        
+
         /* UEFI Config */
         public const string UEFI_BOOT = @"\EFI\boot\";
-        //public const string BOOT_GRUB = @"\boot\grub\";
+        public const string BOOT_GRUB = @"\boot\";
 
         public const string UEFI_PARTITION_MOUNTPOINT = "Z:";
         public const string UEFI_GRUB_BIN64 = "grubx64.efi";

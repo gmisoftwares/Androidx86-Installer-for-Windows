@@ -37,7 +37,7 @@ namespace Android_UEFIInstaller
             Log.write("-TargetDrive: " + InstallDrive);
             Log.write("-UserData: " + UserDataSize);
 
-         
+           
             string OtherInstall = SearchForPreviousInstallation(config.INSTALL_FOLDER);
             if ( OtherInstall != "0")
             {
@@ -47,6 +47,9 @@ namespace Android_UEFIInstaller
 
             if (!SetupDirectories(InstallDirectory))
                 return false;
+
+            //if (!InstallBootObjects(ISOFilePath))
+            //    goto cleanup;   //testing to be deleted later
 
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
@@ -94,10 +97,10 @@ namespace Android_UEFIInstaller
             if (!WriteAndroidIDFile(InstallDirectory))
                 goto cleanup;
 
-            if (!InstallBootObjects(ISOFilePath))
+            if (!InstallBootObjects(ISOFilePath,InstallDirectory))
                 goto cleanup;
 
-          
+
             Log.write("==========================================");
             Log.updateStatus("Installation finished!");
             return true;
@@ -189,7 +192,19 @@ namespace Android_UEFIInstaller
 
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                     return false;
-         
+
+
+            string tempDir = ExtractDirectory + @"\temp";
+            if (!Directory.Exists(tempDir))
+            {
+                Directory.CreateDirectory(tempDir);
+                Log.write("-temp Folder Created: " + tempDir);
+            }
+
+            ExecutableArgs = string.Format(" x \"{0}\" \"efi\\boot\\*\" \"boot\\grub\\grub.cfg\" \"boot\\grub\\theme\\*\" \"boot\\grub\\fonts\\*\" -o{1}", ISOFilePath, tempDir);
+            Log.updateStatus("Status: Extracting boot files...");
+            ExecuteCLICommand(ExecutablePath, ExecutableArgs);
+
             return true;
         }
 
@@ -335,7 +350,7 @@ namespace Android_UEFIInstaller
 
         }
 
-        protected abstract bool InstallBootObjects(Object extraData);
+        protected abstract bool InstallBootObjects(Object extraData,string installDir);
         protected abstract bool UnInstallBootObjects(Object extraData);
 
         protected virtual bool cleanup(string directory)
@@ -460,7 +475,7 @@ namespace Android_UEFIInstaller
             if (!VerifyFiles(FileList))
                 goto cleanup;
 
-            if (!InstallBootObjects(ISOFilePath))
+            if (!InstallBootObjects(ISOFilePath,InstallDirectory))
                 goto cleanup;
 
             setVersionTag(ISOFilePath, InstallDirectory);
