@@ -17,8 +17,13 @@ This installer will help users install Android-x86 on PC from windows, without H
 - .Net Framework 4.5
 - Android System image with **UEFI** Support from [Android-x86.org](www.android-x86.org)
 
-
 ## Change log
+v2.9
+ - Added support for squashfs extraction
+ - Added support for erofs extraction
+ - Install boot/grub files from iso or use default
+ - Added update function when the selected iso is newer than previous version installed
+ 
 v2.4
  - Update Detection of RemixOS image
  - Fix UEFI Init Fail with Surface Pro devices
