@@ -19,6 +19,11 @@ This installer will help users install Android-x86 on PC from windows, without H
 
 
 ## Change log
+v2.9
+ - Added support for squashfs, erofs images extraction when root is enabled
+ - Install boot/grub files for multibooting support
+ - Added update function when the selected iso is newer than previous version installed
+ - 
 v2.4
  - Update Detection of RemixOS image
  - Fix UEFI Init Fail with Surface Pro devices
