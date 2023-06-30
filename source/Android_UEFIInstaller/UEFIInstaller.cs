@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Android_UEFIInstaller
 {
@@ -37,8 +38,9 @@ namespace Android_UEFIInstaller
              *           :\EFI\Android\grub.cfg
              */
              
-        protected override bool InstallBootObjects(Object extraData,string installDir)
+        protected override bool InstallBootObjects(object extraData,string installDir)
         {
+            string InstallDir = installDir;
             string EFI_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.UEFI_BOOT;
             string BOOT_DIR = config.UEFI_PARTITION_MOUNTPOINT + config.BOOT_GRUB;
 
@@ -50,19 +52,44 @@ namespace Android_UEFIInstaller
             if (!CreateBootDirectory(EFI_DIR))
                 return false;
 
-            if (!CopyBootFiles((String)extraData,installDir,EFI_DIR))
+            CreateVersionInfo((string)extraData, installDir);
+
+            if (!CopyBootFiles(InstallDir,EFI_DIR))
                 return false;
 
-            if (!CopyBootGrubFiles((String)extraData,installDir, BOOT_DIR))
+            if (!CopyBootGrubFiles(BOOT_DIR))
                 return false;
 
             if (!CreateUEFIBootOption(config.UEFI_PARTITION_MOUNTPOINT))
                 return false;          
 
-            if (!UnMountFirmwarePartition())
+           if (!UnMountFirmwarePartition())
                 return false;
 
             return true;
+        }
+
+        private void CreateVersionInfo(string ISOFilePath, string ExtractDirector)
+        {
+            string fileName = ISOFilePath.Split('\\').Last().Replace(".iso", "");
+
+            string[] parts = fileName.Split('-');
+
+            string BUILD = parts.Last();    //20230614
+            string ANDROIDVERS = parts[1];      //v15.8.6
+            string BUILDTYPE = parts[4];        //gapps or foss
+
+            string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
+
+            Log.updateStatus("Status: Copying boot files...");
+            File.WriteAllText(ExtractDirector + @"\tag.dat", output);
+
+
+            string srcDir = Environment.CurrentDirectory + @"\EFI\bliss\";
+            string CFG = File.ReadAllText(srcDir + config.UEFI_GRUB_CONFIG);
+            CFG = CFG.Replace("BLISS_VER", ANDROIDVERS);
+
+            File.WriteAllText(ExtractDirector + @"\" + config.UEFI_GRUB_CONFIG, CFG);
         }
 
         protected override bool UnInstallBootObjects(Object extraData)
@@ -122,66 +149,53 @@ namespace Android_UEFIInstaller
 
         private bool CreateBootDirectory(string directory)
         {
-
             Log.write("-Setup Boot Directory...");
-            if (!Directory.Exists(directory))
+            try
+            {
+                //directory = @"C:\AndroidOS\EFI\bliss"; testing
+
+                if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
                 Log.write("-Boot Folder Created: " + directory);
             }
-            else
+            }catch(Exception ex)
             {
-                Log.write("-Boot Directory is Already Exist");
+                Log.write(ex.Message);
                 return false;
             }
-
+            
             return true;
         }
 
-        private bool CopyBootFiles(string ISOFilePath,string InstallDirectory, string EFI_DIR)
+        private bool CopyBootFiles(string InstallDir,string EFI_DIR)
         {
-            //EFI_DIR = @"C:\AndroidOS\";
-
-            Log.write("-Copy Boot files");
+            // EFI_DIR = @"C:\AndroidOS\EFI\bliss"; testing
+            Log.updateStatus("Status: Copying boot files (1/2)...");
+            Log.write("-Copy EFI Boot files");
             try
             {
-                //Backward Compatibility <15
-                //if (Environment.Is64BitOperatingSystem)
-                //    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN64, EFI_DIR + @"\" + config.UEFI_GRUB_BIN64, false);
-                //else
-                //    File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN32, EFI_DIR + @"\" + config.UEFI_GRUB_BIN32, false);
+                string srcDir = Environment.CurrentDirectory + @"\EFI\bliss\";
 
-                //File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_CONFIG, EFI_DIR + @"\" + config.UEFI_GRUB_CONFIG, false);    //Android-x86
-               //End
-                 
-                //string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-
-                //testing without this \"boot\\grub\\grub.cfg\"
-                //string ExecutableArgs = string.Format(" e \"{0}\" \"efi\\boot\\*\" -o{1}", ISOFilePath, EFI_DIR);   
-
-                //Log.updateStatus("Status: Copying boot files...");
-                //if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
-                //    return false;
-
-                string tempDir = InstallDirectory + @"\temp\\efi\\boot\";
-
-                if (Directory.Exists(tempDir))
+                if (Environment.Is64BitOperatingSystem)
+                {  
+                    File.Copy(srcDir + config.UEFI_GRUB_BIN64, EFI_DIR + config.UEFI_GRUB_BIN64, false);
+                    File.Copy(srcDir + config.UEFI_BOOT_BIN64, EFI_DIR + config.UEFI_BOOT_BIN64, false);
+                    File.Copy(srcDir + config.UEFI_BOOT_BLISS64, EFI_DIR + config.UEFI_BOOT_BLISS64, false);
+                }
+                else
                 {
-                    Log.updateStatus("Status: Copying boot files...");
-
-                    foreach (string dirPath in Directory.GetDirectories(tempDir, "*", SearchOption.AllDirectories))
-                    {
-                        Directory.CreateDirectory(dirPath.Replace(tempDir, EFI_DIR));
-                    }
-
-                    foreach (string newPath in Directory.GetFiles(tempDir, "*.*", SearchOption.AllDirectories))
-                    {
-                        File.Copy(newPath, newPath.Replace(tempDir, EFI_DIR), true);
-                    }
-
+                    //File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN32, EFI_DIR + config.UEFI_GRUB_BIN32, false);
+                    //File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_BOOT_BIN32, EFI_DIR + config.UEFI_BOOT_BIN32, false);
+                    File.Copy(srcDir + config.UEFI_BOOT_BLISS32, EFI_DIR  + config.UEFI_BOOT_BLISS32, false);
                 }
 
+                Log.write("-Copy configuration file");
+                File.Copy(InstallDir + @"\" + config.UEFI_GRUB_CONFIG, EFI_DIR + config.UEFI_GRUB_CONFIG, true);     
+                File.Delete(InstallDir + @"\" + config.UEFI_GRUB_CONFIG);
+                    
                 return true;
+
             }
             catch (Exception ex)
             {
@@ -191,49 +205,33 @@ namespace Android_UEFIInstaller
             
         }
 
-        private bool CopyBootGrubFiles(string ISOFilePath, string InstallDirectory, string BOOT_DIR)
+        private bool CopyBootGrubFiles(string BOOT_DIR)
         {
-            //BOOT_DIR = @"C:\AndroidOS\";
+           // BOOT_DIR = @"C:\AndroidOS\boot\";
+            Log.updateStatus("Status: Copying boot files (2/2)...");
+            Log.write("-Copy Grub Boot files");
 
-            Log.write(" - Copy Boot files");
             try
             {
-                //string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
+               string tempDir = Environment.CurrentDirectory + @"\boot\";
 
-                ////testing with \"boot\\grub\\grub.cfg\"
-                //string ExecutableArgs = string.Format(" x \"{0}\" \"boot\\grub\\grub.cfg\" \"boot\\grub\\theme\\*\" \"boot\\grub\\fonts\\*\" -o{1}", ISOFilePath, BOOT_DIR);
+               foreach (string dirPath in Directory.GetDirectories(tempDir, "*", SearchOption.AllDirectories))
+               {
+                   Directory.CreateDirectory(dirPath.Replace(tempDir, BOOT_DIR));
+               }
 
-                //Log.updateStatus("Status: Copying boot files...");
-                //if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
-                //    return false;
+               foreach (string newPath in Directory.GetFiles(tempDir, "*.*", SearchOption.AllDirectories))
+               {
+                   File.Copy(newPath, newPath.Replace(tempDir, BOOT_DIR), true);
+               }
 
-                string tempDir = InstallDirectory + @"\temp\\boot\";
-
-                if (Directory.Exists(tempDir))
-                {
-                    Log.updateStatus("Status: Copying boot files...");
-
-                    foreach (string dirPath in Directory.GetDirectories(tempDir, "*", SearchOption.AllDirectories))
-                    {
-                        Directory.CreateDirectory(dirPath.Replace(tempDir, BOOT_DIR));
-                    }
-
-                    foreach (string newPath in Directory.GetFiles(tempDir, "*.*", SearchOption.AllDirectories))
-                    {
-                        File.Copy(newPath, newPath.Replace(tempDir, BOOT_DIR), true);
-                    }
-
-                    Directory.Delete(InstallDirectory+ @"\temp",true);
-                }
-
-                return true;
+               return true;
             }
             catch (Exception ex)
             {
                 Log.write(ex.Message);
                 return false;
             }
-
         }
 
         private bool CreateUEFIBootOption(string Drive)

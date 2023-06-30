@@ -48,13 +48,11 @@ namespace Android_UEFIInstaller
             if (!SetupDirectories(InstallDirectory))
                 return false;
 
-            //if (!InstallBootObjects(ISOFilePath))
-            //    goto cleanup;   //testing to be deleted later
+           // if (!InstallBootObjects(ISOFilePath,InstallDirectory))
+             //   goto cleanup;   //testing to be deleted later
 
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
-
-            setVersionTag(ISOFilePath, InstallDirectory);
            
             /*
              * System.sfs found extract it
@@ -193,36 +191,7 @@ namespace Android_UEFIInstaller
             if (!ExecuteCLICommand(ExecutablePath, ExecutableArgs))
                     return false;
 
-
-            string tempDir = ExtractDirectory + @"\temp";
-            if (!Directory.Exists(tempDir))
-            {
-                Directory.CreateDirectory(tempDir);
-                Log.write("-temp Folder Created: " + tempDir);
-            }
-
-            ExecutableArgs = string.Format(" x \"{0}\" \"efi\\boot\\*\" \"boot\\grub\\grub.cfg\" \"boot\\grub\\theme\\*\" \"boot\\grub\\fonts\\*\" -o{1}", ISOFilePath, tempDir);
-            Log.updateStatus("Status: Extracting boot files...");
-            ExecuteCLICommand(ExecutablePath, ExecutableArgs);
-
             return true;
-        }
-
-        private void setVersionTag(string ISOFilePath, string ExtractDirector)
-        {
-            string fileName = ISOFilePath.Split('\\').Last().Replace(".iso","");
-          
-            string[] parts = fileName.Split('-');
-
-            string BUILD = parts.Last();    //20230614
-            string ANDROIDVERS = parts[1];      //v15.8.6
-            string BUILDTYPE = parts[4];        //gapps or foss
-
-            string output = string.Format("{0};{1};{2}",BUILD,ANDROIDVERS,BUILDTYPE);
-            
-            Log.updateStatus("Status: Copying boot files...");
-            File.WriteAllText(ExtractDirector + @"\tag.txt", output);
-            //return File.Exists(ExtractDirector + @"\tag.txt");
         }
 
         private bool ExtractSFS(string fileToExtract,string SFSPath)
@@ -477,9 +446,7 @@ namespace Android_UEFIInstaller
 
             if (!InstallBootObjects(ISOFilePath,InstallDirectory))
                 goto cleanup;
-
-            setVersionTag(ISOFilePath, InstallDirectory);
-
+       
             Log.write("==========================================");
             Log.updateStatus("Installation finished!");
             return true;
@@ -495,4 +462,6 @@ namespace Android_UEFIInstaller
         }
 
     }
+
+   
 }

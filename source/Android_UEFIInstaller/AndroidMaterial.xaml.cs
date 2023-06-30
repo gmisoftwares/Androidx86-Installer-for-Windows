@@ -507,13 +507,13 @@ namespace Android_UEFIInstaller
                 string BUILDTYPE = parts[4];        //gapps or foss
                 string BUILDDATE = parts.Last();    //20230614
 
-                if (!File.Exists(ExtractDirector + "\\tag.txt"))
+                if (!File.Exists(ExtractDirector + "\\tag.dat"))
                 {
                     Log.updateStatus("Status: Ready...");
                     return false;
                 }
 
-                string output = File.ReadAllText(ExtractDirector + "\\tag.txt");
+                string output = File.ReadAllText(ExtractDirector + "\\tag.dat");
                 string[] outs = output.Split(';');
                 string builddate = outs[0];
                 string androidvers = outs[1];

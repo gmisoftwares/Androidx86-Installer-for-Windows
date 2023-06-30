@@ -63,6 +63,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Bliss-icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MaterialDesignColors">
       <HintPath>..\packages\MaterialDesignColors.1.0.0\lib\net45\MaterialDesignColors.dll</HintPath>
@@ -179,6 +182,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\android-text.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Bliss-icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
