@@ -21,10 +21,5 @@ ipch/
 [Bb]uild/
 obj/
 source/Win32-UEFILibrary
-bin/make_installer/Androidx86-Installv29.0000/efi/bliss/grub.cfg
-bin/make_installer/Androidx86-Installv29.0000/efi/bliss/grubx64.efi
-bin/make_installer/Androidx86-Installv29.0000/efi/bliss/BOOTx64.EFI
-bin/make_installer/Androidx86-Installv29.0000/efi/bliss/Blissx64.efi
-bin/make_installer/Androidx86-Installv29.0000/efi/bliss/Blissa32.efi
 bin/make_installer/Androidx86-Installv29.0000/boot/grub/grub.cfg
 *.TBL

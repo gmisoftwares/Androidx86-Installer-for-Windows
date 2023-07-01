@@ -81,11 +81,11 @@ namespace Android_UEFIInstaller
 
             string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
 
-            Log.updateStatus("Status: Copying boot files...");
+            Log.updateStatus("Status: Creating tag file...");
             File.WriteAllText(ExtractDirector + @"\tag.dat", output);
 
 
-            string srcDir = Environment.CurrentDirectory + @"\EFI\bliss\";
+            string srcDir = Environment.CurrentDirectory + @"\EFI\boot\";
             string CFG = File.ReadAllText(srcDir + config.UEFI_GRUB_CONFIG);
             CFG = CFG.Replace("BLISS_VER", ANDROIDVERS);
 
@@ -175,19 +175,17 @@ namespace Android_UEFIInstaller
             Log.write("-Copy EFI Boot files");
             try
             {
-                string srcDir = Environment.CurrentDirectory + @"\EFI\bliss\";
+                string srcDir = Environment.CurrentDirectory + @"\EFI\boot\";
+
+                File.Copy(srcDir + config.UEFI_BOOT_BIN64, EFI_DIR + config.UEFI_BOOT_BIN64, false);
 
                 if (Environment.Is64BitOperatingSystem)
                 {  
                     File.Copy(srcDir + config.UEFI_GRUB_BIN64, EFI_DIR + config.UEFI_GRUB_BIN64, false);
-                    File.Copy(srcDir + config.UEFI_BOOT_BIN64, EFI_DIR + config.UEFI_BOOT_BIN64, false);
-                    File.Copy(srcDir + config.UEFI_BOOT_BLISS64, EFI_DIR + config.UEFI_BOOT_BLISS64, false);
                 }
                 else
                 {
-                    //File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_GRUB_BIN32, EFI_DIR + config.UEFI_GRUB_BIN32, false);
-                    //File.Copy(Environment.CurrentDirectory + @"\" + config.UEFI_BOOT_BIN32, EFI_DIR + config.UEFI_BOOT_BIN32, false);
-                    File.Copy(srcDir + config.UEFI_BOOT_BLISS32, EFI_DIR  + config.UEFI_BOOT_BLISS32, false);
+                    File.Copy(srcDir + config.UEFI_GRUB_BIN32, EFI_DIR + config.UEFI_GRUB_BIN32, false);
                 }
 
                 Log.write("-Copy configuration file");
@@ -195,7 +193,6 @@ namespace Android_UEFIInstaller
                 File.Delete(InstallDir + @"\" + config.UEFI_GRUB_CONFIG);
                     
                 return true;
-
             }
             catch (Exception ex)
             {

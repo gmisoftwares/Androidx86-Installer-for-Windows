@@ -4,26 +4,26 @@
     {
 
         /* General Config */
-        public const string BOOT_ENTRY_TEXT = "Bliss-OS";     /* Description */
+        public const string BOOT_ENTRY_TEXT = "Android-OS";     /* Description */
         public const long   ANDROID_SYSTEM_SIZE = 2147483648; /* Disk should have at least 2GB Free space for System ONLY */
         /* OS-Dir Config */
         public const string INSTALL_FOLDER = "AndroidOS";
         public const string INSTALL_DIR = @"{0}:\" + INSTALL_FOLDER;
 
         /* UEFI Config */
-        public const string UEFI_BOOT = @"\EFI\bliss\";
+        public const string UEFI_BOOT = @"\EFI\boot\";
         public const string BOOT_GRUB = @"\boot\";
 
         public const string UEFI_PARTITION_MOUNTPOINT = "Z:";
         public const string UEFI_GRUB_BIN64 = "grubx64.efi";
-        public const string UEFI_GRUB_BIN32 = "gruba32.efi";
+        public const string UEFI_GRUB_BIN32 = "grubx32.efi";
         public const string UEFI_BOOT_BIN64 = "BOOTx64.EFI";
 
-        public const string UEFI_BOOT_BLISS32 = "Blissa32.efi";
-        public const string UEFI_BOOT_BLISS64 = "Blissx64.efi";
+        //public const string UEFI_BOOT_BLISS32 = "Blissa32.efi";
+        //public const string UEFI_BOOT_BLISS64 = "Blissx64.efi";
 
         public const string UEFI_GRUB_CONFIG = "grub.cfg";
-        public const string UEFI_GRUB_RX_CONFIG = "grub_remix.cfg";
+        //public const string UEFI_GRUB_RX_CONFIG = "grub_remix.cfg";
         //public static bool RemixOS_Found = false;
 
         /* Log file */
