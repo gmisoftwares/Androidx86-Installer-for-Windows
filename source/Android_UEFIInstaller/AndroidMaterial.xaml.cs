@@ -78,6 +78,11 @@ namespace Android_UEFIInstaller
             {
                 DisableUI();
                 MessageBox.Show("Not all system requirements are met\nPlease check the installer log");
+            }else if (!Environment.Is64BitOperatingSystem)
+            {
+                tgRoot.IsEnabled = false;
+                Log.write("Root disabled on 32bit device");
+                MessageBox.Show("Root function not available on 32bit devices");
             }
 
             Log.write("==========================================");
@@ -423,7 +428,6 @@ namespace Android_UEFIInstaller
 
         private void txtlog_TextChanged(object sender, TextChangedEventArgs e)
         {
-
             txtlog.ScrollToEnd();
         }
 
@@ -496,39 +500,65 @@ namespace Android_UEFIInstaller
         {
             Log.updateStatus("Status: checking for update...");
 
+            if (!File.Exists(ExtractDirector + "\\version.dat"))
+            {
+                Log.updateStatus("Status: Ready...");
+                return false;
+            }
+
             try
             {
-
                 string fileName = ISOFilePath.Split('\\').Last().Replace(".iso", "");
 
                 string[] parts = fileName.Split('-');
 
-                string ANDROIDVERS = parts[1];      //v15.8.6
-                string BUILDTYPE = parts[4];        //gapps or foss
-                string BUILDDATE = parts.Last();    //20230614
+                int BUILD = 0;    //20230614
+                string ANDROIDVERS = ""; //v15.8.6
+                string BUILDTYPE = ""; //gapps or foss
 
-                if (!File.Exists(ExtractDirector + "\\tag.dat"))
+                foreach (string part in parts)
+                {
+                    if (part.StartsWith("v") || part.Contains("."))
+                    {
+                        ANDROIDVERS = part.Replace(".", "");
+                    }
+                    else
+                        if (part.Contains("gapp") || part.Contains("foss"))
+                    {
+                        BUILDTYPE = part;
+                    }
+                    else
+                     if (part.Length >= 5)
+                    {
+                        int.TryParse(part, out BUILD);
+                    }
+                }
+
+                if (ANDROIDVERS == "" || BUILDTYPE == "" || BUILD == 0)
                 {
                     Log.updateStatus("Status: Ready...");
                     return false;
                 }
 
-                string output = File.ReadAllText(ExtractDirector + "\\tag.dat");
+                string output = File.ReadAllText(ExtractDirector + "\\version.dat");
                 string[] outs = output.Split(';');
                 string builddate = outs[0];
                 string androidvers = outs[1];
-                string buildtype =outs.Last(); 
+                string buildtype =outs.Last();
 
-                if (buildtype == BUILDTYPE)
+                int DATE = 0;
+
+                if (buildtype.Contains(BUILDTYPE)||BUILDTYPE.Contains(buildtype))
                 {
-                    ANDROIDVERS = ANDROIDVERS.Split('.').First().Replace("v", "");
-                    androidvers = androidvers.Split('.').First().Replace("v", "");
-                    int VERS = int.Parse(ANDROIDVERS);
-                    int vers = int.Parse(androidvers);
-
-                    int bdate = int.Parse(builddate);
-                    int DATE = int.Parse(BUILDDATE);
-
+                    ANDROIDVERS = ANDROIDVERS.Replace("v", "");
+                    androidvers = androidvers.Replace("v", "");
+                    int VERS = 0;
+                        int.TryParse(ANDROIDVERS,out VERS);
+                    int vers = 0;
+                        int.TryParse(androidvers,out vers);
+                    int bdate = 0;
+                        int.TryParse(builddate,out bdate);
+                    
                     Log.updateStatus("Status: Ready...");
 
                     if (vers > VERS)
@@ -536,7 +566,7 @@ namespace Android_UEFIInstaller
                         return true;
                     }
 
-                    if ((vers == VERS) && (bdate > DATE))
+                    if ((vers == VERS) && (bdate > BUILD))
                     {
                         return true;
                     }

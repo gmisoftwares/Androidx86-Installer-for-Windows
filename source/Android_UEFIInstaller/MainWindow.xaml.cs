@@ -65,6 +65,7 @@ namespace Android_UEFIInstaller
                 DisableUI();
             }
 
+                     
             Log.write("==========================================");
             
         }
@@ -199,10 +200,10 @@ namespace Android_UEFIInstaller
             Log.write("OSVer: " + Environment.OSVersion.ToString());
             if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                switch (System.Environment.OSVersion.Version.Major)
+                switch (Environment.OSVersion.Version.Major)
                 {
                     case 6:
-                        if (System.Environment.OSVersion.Version.Minor >= 2)
+                        if (Environment.OSVersion.Version.Minor >= 2)
                             Log.write("OperatingSystem Version ... ok");
                         break;
                     case 10:

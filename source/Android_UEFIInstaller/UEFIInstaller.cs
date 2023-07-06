@@ -75,15 +75,34 @@ namespace Android_UEFIInstaller
 
             string[] parts = fileName.Split('-');
 
-            string BUILD = parts.Last();    //20230614
-            string ANDROIDVERS = parts[1];      //v15.8.6
-            string BUILDTYPE = parts[4];        //gapps or foss
+            int BUILD = 0;    //20230614
+            string ANDROIDVERS = ""; //v15.8.6
+            string BUILDTYPE = ""; //gapps or foss
 
-            string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
+            foreach (string part in parts)
+            {
+                if (part.StartsWith("v")||part.Contains("."))
+                {
+                    ANDROIDVERS = part.Replace(".","");     
+                }else
+                    if (part.Contains("gapp") || part.Contains("foss"))
+                {
+                    BUILDTYPE = part;      
+                }
+                else
+                 if (part.Length>=5)
+                 {
+                    int.TryParse(part, out BUILD);
+                 }
+            }
 
-            Log.updateStatus("Status: Creating tag file...");
-            File.WriteAllText(ExtractDirector + @"\tag.dat", output);
+            if(ANDROIDVERS!="" && BUILDTYPE != "" && BUILD > 0)
+            {
+                string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
 
+                Log.updateStatus("Status: Creating tag file...");
+                File.WriteAllText(ExtractDirector + @"\version.dat", output);
+            }
 
             string srcDir = Environment.CurrentDirectory + @"\EFI\boot\";
             string CFG = File.ReadAllText(srcDir + config.UEFI_GRUB_CONFIG);
