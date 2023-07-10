@@ -75,34 +75,36 @@ namespace Android_UEFIInstaller
 
             string[] parts = fileName.Split('-');
 
-            int BUILD = 0;    //20230614
-            string ANDROIDVERS = ""; //v15.8.6
-            string BUILDTYPE = ""; //gapps or foss
+            //int BUILD = 0;    //20230614
+            string ANDROIDVERS = "v15.8.6";
+            //string BUILDTYPE = ""; //gapps or foss
 
             foreach (string part in parts)
             {
                 if (part.StartsWith("v")||part.Contains("."))
                 {
-                    ANDROIDVERS = part.Replace(".","");     
-                }else
-                    if (part.Contains("gapp") || part.Contains("foss"))
-                {
-                    BUILDTYPE = part;      
+                    ANDROIDVERS = part;
+                    break;    
                 }
-                else
-                 if (part.Length>=5)
-                 {
-                    int.TryParse(part, out BUILD);
-                 }
+                //else
+                //    if (part.Contains("gapp") || part.Contains("foss"))
+                //{
+                //    BUILDTYPE = part;      
+                //}
+                //else
+                // if (part.Length>=5)
+                // {
+                //    int.TryParse(part, out BUILD);
+                // }
             }
 
-            if(ANDROIDVERS!="" && BUILDTYPE != "" && BUILD > 0)
-            {
-                string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
+            //if(ANDROIDVERS!="" && BUILDTYPE != "" && BUILD > 0)
+            //{
+            //    string output = string.Format("{0};{1};{2}", BUILD, ANDROIDVERS, BUILDTYPE);
 
-                Log.updateStatus("Status: Creating tag file...");
-                File.WriteAllText(ExtractDirector + @"\version.dat", output);
-            }
+            //    Log.updateStatus("Status: Creating tag file...");
+            //    File.WriteAllText(ExtractDirector + @"\version.dat", output);
+            //}
 
             string srcDir = Environment.CurrentDirectory + @"\EFI\boot\";
             string CFG = File.ReadAllText(srcDir + config.UEFI_GRUB_CONFIG);
@@ -196,15 +198,15 @@ namespace Android_UEFIInstaller
             {
                 string srcDir = Environment.CurrentDirectory + @"\EFI\boot\";
 
-                File.Copy(srcDir + config.UEFI_BOOT_BIN64, EFI_DIR + config.UEFI_BOOT_BIN64, false);
+                File.Copy(srcDir + config.UEFI_BOOT_BIN64, EFI_DIR + config.UEFI_BOOT_BIN64, true);
 
                 if (Environment.Is64BitOperatingSystem)
                 {  
-                    File.Copy(srcDir + config.UEFI_GRUB_BIN64, EFI_DIR + config.UEFI_GRUB_BIN64, false);
+                    File.Copy(srcDir + config.UEFI_GRUB_BIN64, EFI_DIR + config.UEFI_GRUB_BIN64, true);
                 }
                 else
                 {
-                    File.Copy(srcDir + config.UEFI_GRUB_BIN32, EFI_DIR + config.UEFI_GRUB_BIN32, false);
+                    File.Copy(srcDir + config.UEFI_GRUB_BIN32, EFI_DIR + config.UEFI_GRUB_BIN32, true);
                 }
 
                 Log.write("-Copy configuration file");

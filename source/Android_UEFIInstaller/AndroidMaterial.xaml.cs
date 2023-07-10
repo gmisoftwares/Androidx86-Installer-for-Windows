@@ -412,7 +412,7 @@ namespace Android_UEFIInstaller
                 string Drive = cboDrives.Text.Substring(0, 1);
                 string InstallDirectory = string.Format(config.INSTALL_DIR, Drive);
 
-                cmdUpdate.IsEnabled = checkUpdate(txtISOPath.Text, InstallDirectory);
+                cmdUpdate.IsEnabled = SearchForPreviousInstallation(); // checkUpdate(txtISOPath.Text, InstallDirectory);
             }
         }
 
@@ -496,92 +496,106 @@ namespace Android_UEFIInstaller
             Log.write("root = " + rootOn);
         }
 
-        private bool checkUpdate(string ISOFilePath, string ExtractDirector)
-        {
-            Log.updateStatus("Status: checking for update...");
+        //private bool checkUpdate(string ISOFilePath, string ExtractDirector)
+        //{
+        //    Log.updateStatus("Status: checking for update...");
 
-            if (!File.Exists(ExtractDirector + "\\version.dat"))
-            {
-                Log.updateStatus("Status: Ready...");
-                return false;
-            }
+        //    if (!File.Exists(ExtractDirector + "\\version.dat"))
+        //    {
+        //        Log.updateStatus("Status: Ready...");
+        //        return false;
+        //    }
 
-            try
-            {
-                string fileName = ISOFilePath.Split('\\').Last().Replace(".iso", "");
+        //    try
+        //    {
+        //        string fileName = ISOFilePath.Split('\\').Last().Replace(".iso", "");
 
-                string[] parts = fileName.Split('-');
+        //        string[] parts = fileName.Split('-');
 
-                int BUILD = 0;    //20230614
-                string ANDROIDVERS = ""; //v15.8.6
-                string BUILDTYPE = ""; //gapps or foss
+        //        int BUILD = 0;    //20230614
+        //        string ANDROIDVERS = ""; //v15.8.6
+        //        string BUILDTYPE = ""; //gapps or foss
 
-                foreach (string part in parts)
-                {
-                    if (part.StartsWith("v") || part.Contains("."))
-                    {
-                        ANDROIDVERS = part.Replace(".", "");
-                    }
-                    else
-                        if (part.Contains("gapp") || part.Contains("foss"))
-                    {
-                        BUILDTYPE = part;
-                    }
-                    else
-                     if (part.Length >= 5)
-                    {
-                        int.TryParse(part, out BUILD);
-                    }
-                }
+        //        foreach (string part in parts)
+        //        {
+        //            if (part.StartsWith("v") || part.Contains("."))
+        //            {
+        //                ANDROIDVERS = part.Replace(".", "");
+        //            }
+        //            else
+        //                if (part.Contains("gapp") || part.Contains("foss"))
+        //            {
+        //                BUILDTYPE = part;
+        //            }
+        //            else
+        //             if (part.Length >= 5)
+        //            {
+        //                int.TryParse(part, out BUILD);
+        //            }
+        //        }
 
-                if (ANDROIDVERS == "" || BUILDTYPE == "" || BUILD == 0)
-                {
-                    Log.updateStatus("Status: Ready...");
-                    return false;
-                }
+        //        if (ANDROIDVERS == "" || BUILDTYPE == "" || BUILD == 0)
+        //        {
+        //            Log.updateStatus("Status: Ready...");
+        //            return false;
+        //        }
 
-                string output = File.ReadAllText(ExtractDirector + "\\version.dat");
-                string[] outs = output.Split(';');
-                string builddate = outs[0];
-                string androidvers = outs[1];
-                string buildtype =outs.Last();
+        //        string output = File.ReadAllText(ExtractDirector + "\\version.dat");
+        //        string[] outs = output.Split(';');
+        //        string builddate = outs[0];
+        //        string androidvers = outs[1].Replace(".", "");
+        //        string buildtype =outs.Last();
 
-                int DATE = 0;
+        //        int DATE = 0;
 
-                if (buildtype.Contains(BUILDTYPE)||BUILDTYPE.Contains(buildtype))
-                {
-                    ANDROIDVERS = ANDROIDVERS.Replace("v", "");
-                    androidvers = androidvers.Replace("v", "");
-                    int VERS = 0;
-                        int.TryParse(ANDROIDVERS,out VERS);
-                    int vers = 0;
-                        int.TryParse(androidvers,out vers);
-                    int bdate = 0;
-                        int.TryParse(builddate,out bdate);
+        //        if (buildtype.Contains(BUILDTYPE)||BUILDTYPE.Contains(buildtype))
+        //        {
+        //            ANDROIDVERS = ANDROIDVERS.Replace("v", "");
+        //            androidvers = androidvers.Replace("v", "");
+        //            int VERS = 0;
+        //                int.TryParse(ANDROIDVERS,out VERS);
+        //            int vers = 0;
+        //                int.TryParse(androidvers,out vers);
+        //            int bdate = 0;
+        //                int.TryParse(builddate,out bdate);
                     
-                    Log.updateStatus("Status: Ready...");
+        //            Log.updateStatus("Status: Ready...");
 
-                    if (vers > VERS)
-                    {
-                        return true;
-                    }
+        //            if (vers > VERS)
+        //            {
+        //                return true;
+        //            }
 
-                    if ((vers == VERS) && (bdate > BUILD))
-                    {
-                        return true;
-                    }
+        //            if ((vers == VERS) && (bdate > BUILD))
+        //            {
+        //                return true;
+        //            }
 
-                }
+        //        }
 
-            }
-            catch (Exception ex)
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.write("Exception: " + ex.Message);
+        //    }
+
+        //    Log.updateStatus("Status: Ready...");
+        //    return false;
+        //}
+
+        private bool SearchForPreviousInstallation()
+        {
+            string[] drives = Environment.GetLogicalDrives();
+
+            foreach (string drive in drives)
             {
-                Log.write("Exception: " + ex.Message);
+                if (File.Exists(drive + config.INSTALL_FOLDER + @"\data.img"))
+                {
+                    return true;
+                }
             }
 
-            Log.updateStatus("Status: Ready...");
             return false;
         }
-
     }
 }

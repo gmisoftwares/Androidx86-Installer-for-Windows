@@ -48,9 +48,6 @@ namespace Android_UEFIInstaller
             if (!SetupDirectories(InstallDirectory))
                 return false;
 
-           // if (!InstallBootObjects(ISOFilePath,InstallDirectory))
-             //   goto cleanup;   //testing to be deleted later
-
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
            
@@ -417,6 +414,15 @@ namespace Android_UEFIInstaller
             Log.write("-ISO File: " + ISOFilePath);
             Log.write("-TargetDrive: " + InstallDrive);
             Log.write("-UserData: " + UserDataSize);
+
+            var files = from file in Directory.EnumerateFiles(InstallDirectory) select file;
+            foreach (var item in files)
+            {
+                if (item != InstallDirectory + @"\data.img")
+                {
+                    File.Delete(item);
+                }  
+            }
 
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
