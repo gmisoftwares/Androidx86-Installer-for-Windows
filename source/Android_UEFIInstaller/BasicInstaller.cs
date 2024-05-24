@@ -56,10 +56,11 @@ namespace Android_UEFIInstaller
              * System.sfs included in Androidx86 dist and not found with RemixOS
              */
 
-            string[] FileList = {InstallDirectory + @"\kernel",
-                                InstallDirectory + @"\initrd.img",
-                                InstallDirectory + @"\system.sfs"
-                                }; //InstallDirectory + @"\gearlock",      Optional
+            string[] FileList = {@"\kernel",
+                                @"\initrd.img",
+                                @"\system.sfs"
+                               
+                                }; //InstallDirectory + @"\gearlock",      Optional InstallDirectory + @"\ramdisk-recovery.img",
 
             string achvFile = "system.sfs";
             if (File.Exists(InstallDirectory + @"\system.efs"))
@@ -77,7 +78,7 @@ namespace Android_UEFIInstaller
             }
 
                      
-            if (!VerifyFiles(FileList))
+            if (!VerifyFiles(InstallDirectory, FileList))
                 goto cleanup;
 
             //if(!DetectAndroidVariant(ISOFilePath,InstallDirectory))
@@ -177,7 +178,7 @@ namespace Android_UEFIInstaller
         {
             //7z.exe x android-x86-4.4-r2.img "efi" "kernel" "gearlock" "initrd.img" "system.sfs" -o"C:\Users\ExtremeGTX\Desktop\installer_test\extracted\"
             string ExecutablePath = Environment.CurrentDirectory + @"\7z.exe";
-            string ExecutableArgs = string.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
+            string ExecutableArgs = string.Format(" x \"{0}\" \"kernel\" \"gearlock\" \"initrd.img\" \"system.*\" \"ramdisk-recovery.img\" -o{1}", ISOFilePath, ExtractDirectory);    //{0} ISO Filename, {1} extraction dir
 
             //
             //Extracting ISO Contents
@@ -262,14 +263,23 @@ namespace Android_UEFIInstaller
         }
         #endregion
 
-        private bool VerifyFiles(string[] FileList)
+        private bool VerifyFiles(string InstallDir,string[] FileList)
         {
             foreach (string file in FileList)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(InstallDir + file))
                 {
                     Log.write("File: " + file + " not exist");
                     return false;
+                }
+
+                var recoveryFile = InstallDir + @"\ramdisk-recovery.img";
+
+                if (File.Exists(recoveryFile))
+                {
+                    Log.write("Writing recovery.img");
+                    File.Copy(recoveryFile, InstallDir + @"\recovery.img", false);
+                    File.Delete(recoveryFile);
                 }
             }
 
@@ -427,9 +437,9 @@ namespace Android_UEFIInstaller
             if (!ExtractISO(ISOFilePath, InstallDirectory))
                 goto cleanup;
 
-            string[] FileList = {InstallDirectory + @"\kernel",
-                                InstallDirectory + @"\initrd.img",
-                                InstallDirectory + @"\system.sfs"
+            string[] FileList = {@"\kernel",
+                                @"\initrd.img",
+                                @"\system.sfs"
                                 }; //InstallDirectory + @"\gearlock",      Optional
 
             string achvFile = "system.sfs";
@@ -447,7 +457,7 @@ namespace Android_UEFIInstaller
                     goto cleanup;
             }
 
-            if (!VerifyFiles(FileList))
+            if (!VerifyFiles(InstallDirectory,FileList))
                 goto cleanup;
 
             if (!InstallBootObjects(ISOFilePath,InstallDirectory))
