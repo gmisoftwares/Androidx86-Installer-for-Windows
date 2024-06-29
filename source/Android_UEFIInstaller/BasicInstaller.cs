@@ -62,11 +62,11 @@ namespace Android_UEFIInstaller
                                
                                 }; //InstallDirectory + @"\gearlock",      Optional InstallDirectory + @"\ramdisk-recovery.img",
 
-            string achvFile = "system.sfs";
+            string achvFile = "system.*";
             if (File.Exists(InstallDirectory + @"\system.efs"))
             {
                 achvFile = "system.efs";
-                FileList[2] = InstallDirectory + @"\system.efs";
+                FileList[2] = @"\system.efs";
             };
 
             if (isRoot == "true")
@@ -446,13 +446,13 @@ namespace Android_UEFIInstaller
             if (File.Exists(InstallDirectory + @"\system.efs"))
             {
                 achvFile = "system.efs";
-                FileList[2] = InstallDirectory + @"\system.efs";
+                FileList[2] = @"\system.efs";
             };
 
             if (isRoot == "true")
             {
                 if (ExtractSFS(achvFile, InstallDirectory))
-                    FileList[2] = InstallDirectory + @"\system.img";
+                    FileList[2] = @"\system.img";
                 else
                     goto cleanup;
             }
